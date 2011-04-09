@@ -26,9 +26,43 @@
 
         </h1>
       </div>
-
       <div id="content">{% block body %}{% end %}</div>
-    </div>
-    {% block bottom %}{% end %}
+      {% block bottom %}{% end %}
+      {% block footer %}
+      <br clear="all" />
+      <div class="footer">
+
+        <div class="first">
+          <p><strong>About</strong></p>
+          <p><!-- The text in the "About Yourself" box on your profile page will automatically appear here. -->
+            i am a soldier!
+          </p>
+        </div>
+
+        <div>
+          <p><strong>Recently</strong></p>
+          <ul class="nav">
+            {% for item in archives %}
+            <li>
+              <a href="/{{ item[0] }}/{{ item[1]}}">{{ item[2] }}</a>
+            </li>
+            {% end %}
+            <li>
+              <a href="/archive"><strong>View All Entries</strong></a>
+            </li>
+          </ul>
+        </div>
+
+        <div class="last">
+	  <p><strong>Et Cetera</strong></p>
+	  <form method="get" id="sform" action="http://blog.jjgod.org/">
+	    <p><input type="text" id="q" value="" name="s" size="15" style="width:80px;background-color:#e5e5e5">
+		<input type="submit" value="Search" style="font-size:10px;vertical-align:top"></p>
+	  </form>
+				
+	</div>
+     </div>
+  {% end %}
+
   </body>
 </html>

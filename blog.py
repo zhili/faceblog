@@ -72,26 +72,7 @@ class BaseHandler(tornado.web.RequestHandler):
         return tornado.web.RequestHandler.render_string(
             self, template_name, users=users, **kwargs)
 
-
-class HomeHandler(BaseHandler):
-    def get(self):
-        entries = db.Query(Entry).order('-published').fetch(limit=5)
-        if not entries:
-            if not self.current_user or self.current_user.administrator:
-                self.redirect("/compose")
-                return
-        self.render("home.html", entries=entries)
-
-
-class EntryHandler(BaseHandler):
-    def get(self, slug):
-        entry = db.Query(Entry).filter("slug =", slug).get()
-        if not entry: raise tornado.web.HTTPError(404)
-        self.render("entry.html", entry=entry)
-
-
-class ArchiveHandler(BaseHandler):
-    def get(self):
+    def get_archives(self,):
         entries = db.Query(Entry).order('-published')
         archives = []
         markDict = {}
@@ -102,7 +83,32 @@ class ArchiveHandler(BaseHandler):
                 continue
             markDict[(year, month)] = 1
             archives.append((year, "%02d" % month, datetime.date(year, month, 1).strftime("%B %Y")))
-        self.render("archive.html", entries=archives)
+        return archives
+
+
+class HomeHandler(BaseHandler):
+    def get(self):
+        entries = db.Query(Entry).order('-published').fetch(limit=5)
+        if not entries:
+            if not self.current_user or self.current_user.administrator:
+                self.redirect("/compose")
+                return
+
+        archives = self.get_archives()
+        self.render("home.html", entries=entries, archives=archives[:4])
+
+
+class EntryHandler(BaseHandler):
+    def get(self, slug):
+        entry = db.Query(Entry).filter("slug =", slug).get()
+        if not entry: raise tornado.web.HTTPError(404)
+        archives = self.get_archives()
+        self.render("entry.html", entry=entry, archives=archives[:4])
+
+
+class ArchiveHandler(BaseHandler):
+    def get(self):
+        self.render("archive.html", entries=self.get_archives(), archives=self.get_archives()[:4])
 
 class MonthArchiveHandle(BaseHandler):
     def get(self, year, month):
@@ -117,7 +123,7 @@ class MonthArchiveHandle(BaseHandler):
             endMonth += 1
         endDate = datetime.date(int(endYear), int(endMonth), 1)
         entries = Entry.all().filter('published >=', startDate).filter('published <', endDate).order('-published')
-        self.render("archives.html", entries=entries)
+        self.render("archives.html", entries=entries, archives=self.get_archives()[:4])
 
 class FeedHandler(BaseHandler):
     def get(self):
