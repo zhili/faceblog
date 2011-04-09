@@ -1,0 +1,191 @@
+/*
+ * Copyright 2009 Facebook
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may
+ * not use this file except in compliance with the License. You may obtain
+ * a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+* { 
+    margin: 0; 
+    padding: 0;
+}
+
+body {
+    background: #fff;
+    color: black;
+    text-align: center;
+    font-size: 18px;
+    line-height: 26px;
+    font-family: "ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande", "Hiragino Sans GB", "Hiragino Sans GB W3", sans-serif;
+}
+
+a { color:#000; text-decoration: none; -webkit-transition: color 0.2s linear; }
+a:hover { color:#666; text-decoration: underline; -webkit-transition: color 0.2s linear; }
+
+p, ul, ol, pre { 
+    margin-bottom: 18px; 
+}
+
+h1, h2, h3, h4 {
+   font-family: "Graublau Web", "Lucida Grande", Helvetica, 'Hiragino Sans GB', "Hiragino Sans GB W6", sans-serif;
+}
+
+h1 { 
+    font-size: 200%; 
+    line-height: 130%;
+    margin-bottom: 18px; 
+}
+
+h2 { 
+    font-size: 180%; 
+    line-height: 130%;
+    margin-bottom: 18px;
+}
+
+h3 { 
+    font-size: 150%; 
+    line-height: 100%;
+    margin-bottom: 20px;
+}
+
+h4 { 
+    font-size: 120%; 
+    line-height: 120%;
+    margin-bottom: 20px;
+}
+
+body,
+input,
+textarea {
+  font-family: Georgia, serif;
+  font-size: 12pt;
+}
+
+table {
+  border-collapse: collapse;
+  border: 0;
+}
+
+td {
+  border: 0;
+  padding: 0;
+}
+
+
+pre,
+code {
+  font-family: monospace;
+  color: #060;
+}
+
+pre {
+  margin-left: 1em;
+  padding-left: 1em;
+  border-left: 1px solid silver;
+  line-height: 14pt;
+}
+
+.container {
+    text-align:center;
+    margin: 0 auto;
+    padding: 0;
+    width: 650px;
+}
+
+/* HEADER */
+.header {
+    padding: 50px 0 0;
+    text-align:left;
+    border-bottom: 1px solid #666;
+}
+
+.header h1 {
+    font-size: 250%;
+    color: #000;
+    text-shadow: #ddd 1px 1px 1px;
+}
+
+.header span {
+    margin-left: 10px;
+    color: #666;
+    font-weight: normal;
+    font-style: italic;
+    font-size: 40%;
+}
+
+.header a { color: #333; }
+.header a:hover { color: #666; }
+
+
+#footer,
+#content{
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+#footer {
+  margin-top: 3em;
+}
+
+
+.entry {
+    border-bottom: 1px solid #ccc;
+    padding:18px 0 0 0;
+    text-align:left;
+    width:500px;
+}
+
+.entry .date {
+    margin-top:-10px;
+    font-size:11px;
+    color: #555;
+
+}
+
+.entry p {
+  margin: 0;
+  margin-bottom: 1em;
+}
+
+/* .entry .body { */
+/*   margin-top: 1em; */
+/*   line-height: 16pt; */
+/* } */
+
+.compose td {
+  vertical-align: middle;
+  padding-bottom: 5px;
+}
+
+.compose td.field {
+  padding-right: 10px;
+}
+
+.compose .title,
+.compose .submit {
+  font-family: "Helvetica Nue", Helvetica, Arial, sans-serif;
+  font-weight: bold;
+}
+
+.compose .title {
+  font-size: 20pt;
+}
+
+.compose .title,
+.compose .markdown {
+  width: 100%;
+}
+
+.compose .markdown {
+  height: 500px;
+  line-height: 16pt;
+}
