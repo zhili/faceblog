@@ -107,7 +107,7 @@ class EntryHandler(BaseHandler):
         slugInfo = (prevEntry.slug if prevEntry else None, nextEntry.slug if nextEntry else None)
         self.render("entry.html", entry=entry, archives=archives[:4], sluginfo=slugInfo)
 
-class PagingHandle(BaseHandler):
+class PagingHandler(BaseHandler):
     def get(self, page):
         query = Entry.all().order('-published')
         thisPagedQuery = PagedQuery(query, PAGESIZE)
@@ -131,7 +131,7 @@ class ArchiveHandler(BaseHandler):
     def get(self):
         self.render("archive.html", entries=self.get_archives(), archives=self.get_archives()[:4])
 
-class MonthArchiveHandle(BaseHandler):
+class MonthArchiveHandler(BaseHandler):
     def get(self, year, month):
 
         startDate = datetime.date(int(year), int(month), 1)
@@ -197,13 +197,13 @@ class EntryModule(tornado.web.UIModule):
     def render(self, entry):
         return self.render_string("modules/entry.html", entry=entry)
 
-class SearchHandle(BaseHandler):
+class SearchHandler(BaseHandler):
     def get(self,):
         keyword = self.get_argument("s").strip()
         entries = Entry.search(keyword)
         self.render("search_result.html", entries=entries, archives=self.get_archives()[:4], SearchKeyWord=keyword)
 
-class SearchIndexingHandle(BaseHandler):
+class SearchIndexingHandler(BaseHandler):
     """Handler for full text indexing task."""
     def post(self):
         key_str = self.get_argument('key')
@@ -228,10 +228,10 @@ application = tornado.wsgi.WSGIApplication([
     (r"/feed", FeedHandler),
     (r"/entry/([^/]+)", EntryHandler),
     (r"/compose", ComposeHandler),
-    (r"/(\d{4})/(\d{2})", MonthArchiveHandle),
-    (r"/page/(\d+)/", PagingHandle),
-    (r"/search", SearchHandle),
-    (r"/tasks/searchindexing", SearchIndexingHandle),
+    (r"/(\d{4})/(\d{2})", MonthArchiveHandler),
+    (r"/page/(\d+)/", PagingHandler),
+    (r"/search", SearchHandler),
+    (r"/tasks/searchindexing", SearchIndexingHandler),
 ], **settings)
 
 
