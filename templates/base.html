@@ -23,11 +23,23 @@
         <h1>
           {{ escape(handler.settings["blog_title"]) }}
           <span>notes by me</span>
-
         </h1>
       </div>
       <div id="content">{% block body %}{% end %}</div>
       {% block bottom %}{% end %}
+      {% block paging %}
+
+      <div class="postnoline">
+        {% if pageinfo[0] %}
+	<span class="previous"><a href="/page/{{pageinfo[0]}}/">← Before</a></span>
+        {% end %}
+        {% if pageinfo[1] %}
+	<span class="next"><a href="/page/{{pageinfo[1]}}/">After -></a></span>
+        {% end %}
+      </div>
+
+      {% end %}
+
       {% block footer %}
       <br clear="all" />
       <div class="footer">

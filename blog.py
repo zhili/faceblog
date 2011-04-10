@@ -25,7 +25,7 @@ import wsgiref.handlers
 import datetime
 from google.appengine.api import users
 from google.appengine.ext import db
-
+from paging import *
 
 class Entry(db.Model):
     """A single blog entry."""
@@ -85,17 +85,13 @@ class BaseHandler(tornado.web.RequestHandler):
             archives.append((year, "%02d" % month, datetime.date(year, month, 1).strftime("%B %Y")))
         return archives
 
+PAGESIZE = 5
 
 class HomeHandler(BaseHandler):
     def get(self):
-        entries = db.Query(Entry).order('-published').fetch(limit=5)
-        if not entries:
-            if not self.current_user or self.current_user.administrator:
-                self.redirect("/compose")
-                return
-
-        archives = self.get_archives()
-        self.render("home.html", entries=entries, archives=archives[:4])
+        # entries = db.Query(Entry).order('-published').fetch(limit=5)
+        self.redirect("/page/1/")
+        return
 
 
 class EntryHandler(BaseHandler):
@@ -103,7 +99,29 @@ class EntryHandler(BaseHandler):
         entry = db.Query(Entry).filter("slug =", slug).get()
         if not entry: raise tornado.web.HTTPError(404)
         archives = self.get_archives()
-        self.render("entry.html", entry=entry, archives=archives[:4])
+        nextEntry = db.Query(Entry).filter('published >', entry.published).order('published').get()
+        prevEntry = db.Query(Entry).filter('published <', entry.published).order('-published').get()
+        slugInfo = (prevEntry.slug if prevEntry else None, nextEntry.slug if nextEntry else None)
+        self.render("entry.html", entry=entry, archives=archives[:4], sluginfo=slugInfo)
+
+class PagingHandle(BaseHandler):
+    def get(self, page):
+        query = Entry.all().order('-published')
+        thisPagedQuery = PagedQuery(query, PAGESIZE)
+        pageNumber = int(page)
+        entries = thisPagedQuery.fetch_page(pageNumber)
+        if not entries:
+            if not self.current_user or self.current_user.administrator:
+                self.redirect("/compose")
+                return
+
+        pageInfo = [None, None]
+        if thisPagedQuery.has_page(pageNumber+1):
+            pageInfo[0] = pageNumber+1
+        if thisPagedQuery.has_page(pageNumber-1):
+            pageInfo[1] = pageNumber-1
+        archives = self.get_archives()
+        self.render("home.html", entries=entries, archives=archives[:4], pageinfo=pageInfo)
 
 
 class ArchiveHandler(BaseHandler):
@@ -137,7 +155,8 @@ class ComposeHandler(BaseHandler):
     def get(self):
         key = self.get_argument("key", None)
         entry = Entry.get(key) if key else None
-        self.render("compose.html", entry=entry)
+        pageInfo = (None, None)
+        self.render("compose.html", entry=entry, archives=self.get_archives()[:4], pageinfo=pageInfo)
 
     @administrator
     def post(self):
@@ -181,6 +200,7 @@ settings = {
     "ui_modules": {"Entry": EntryModule},
     "xsrf_cookies": True,
 }
+
 application = tornado.wsgi.WSGIApplication([
     (r"/", HomeHandler),
     (r"/archive", ArchiveHandler),
@@ -188,6 +208,7 @@ application = tornado.wsgi.WSGIApplication([
     (r"/entry/([^/]+)", EntryHandler),
     (r"/compose", ComposeHandler),
     (r"/(\d{4})/(\d{2})", MonthArchiveHandle),
+    (r"/page/(\d+)/", PagingHandle),
 ], **settings)
 
 

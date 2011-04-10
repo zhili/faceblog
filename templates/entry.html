@@ -3,3 +3,14 @@
 {% block body %}
   {{ modules.Entry(entry) }}
 {% end %}
+
+{% block paging %}
+<div class="postnoline">
+{% if sluginfo[0] %}
+<span class="previous"><a href="/entry/{{sluginfo[0]}}">← Before</a></span>
+{% end %}
+{% if sluginfo[1] %}
+<span class="next"><a href="/entry/{{sluginfo[1]}}">After -></a></span>
+{% end %}
+</div>
+{% end %}
