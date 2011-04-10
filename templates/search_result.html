@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+<div class="entry">
+  {% if entries %}
+    <h2 style="font-weight:normal">Search Results for <strong>{{SearchKeyWord}} </strong></h2>
+  {% else %}
+    <h2 style="font-weight:normal">Sorry, no results for <strong>{{SearchKeyWord}}</strong></h2>
+    <p>Try another search or check out one of these fine recent posts.</p>
+  {% end %}
+</div>
+
+{% for entry in entries %}
+   {{ modules.Entry(entry) }}
+{% end %}
+
+{% end %}
+
+{% block paging %}
+<!-- override paging info -->
+<!-- archive view don't need that! -->
+{% end %}
+

@@ -26,8 +26,9 @@ import datetime
 from google.appengine.api import users
 from google.appengine.ext import db
 from paging import *
+import search
 
-class Entry(db.Model):
+class Entry(search.Searchable, db.Model):
     """A single blog entry."""
     author = db.UserProperty()
     title = db.StringProperty(required=True)
@@ -36,6 +37,8 @@ class Entry(db.Model):
     html = db.TextProperty(required=True)
     published = db.DateTimeProperty(auto_now_add=True)
     updated = db.DateTimeProperty(auto_now=True)
+    INDEX_TITLE_FROM_PROP = 'slug'
+    INDEX_ONLY = ['title', 'markdown']
 
 
 def administrator(method):
@@ -185,6 +188,10 @@ class ComposeHandler(BaseHandler):
                 html=markdown.markdown(self.get_argument("markdown")),
             )
         entry.put()
+        entry.index()
+        # use inmediately index temparay, because xsrf problem
+        # if use task queue there some 403 error
+        # entry.enqueue_indexing(url="/tasks/searchindexbing", xsrf_token=self.xsrf_token)
         self.redirect("/entry/" + entry.slug)
 
 
@@ -192,6 +199,22 @@ class EntryModule(tornado.web.UIModule):
     def render(self, entry):
         return self.render_string("modules/entry.html", entry=entry)
 
+class SearchHandle(BaseHandler):
+    def get(self,):
+        keyword = self.get_argument("s")
+        entries = Entry.search(keyword)
+        self.render("search_result.html", entries=entries, archives=self.get_archives()[:4], SearchKeyWord=keyword)
+
+class SearchIndexing(BaseHandler):
+    """Handler for full text indexing task."""
+    def post(self):
+        key_str = self.get_argument('key')
+        if key_str:
+            key = db.Key(key_str)
+            entity = db.get(key)
+            if entity:
+                entity.index()
+            self.set_status(200)
 
 settings = {
     "blog_title": u"Tornado App",
@@ -199,6 +222,7 @@ settings = {
     "ui_modules": {"Entry": EntryModule},
     "xsrf_cookies": True,
 }
+
 
 application = tornado.wsgi.WSGIApplication([
     (r"/", HomeHandler),
@@ -208,6 +232,8 @@ application = tornado.wsgi.WSGIApplication([
     (r"/compose", ComposeHandler),
     (r"/(\d{4})/(\d{2})", MonthArchiveHandle),
     (r"/page/(\d+)/", PagingHandle),
+    (r"/search", SearchHandle),
+    (r"/tasks/searchindexing", SearchIndexing),
 ], **settings)
 
 
