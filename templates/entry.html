@@ -7,10 +7,10 @@
 {% block paging %}
 <div class="postnoline">
 {% if sluginfo[0] %}
-<span class="previous"><a href="/entry/{{sluginfo[0]}}">← Before</a></span>
+<span class="previous">← <a href="/entry/{{sluginfo[0]}}">{{sluginfo[0]}}</a></span>
 {% end %}
 {% if sluginfo[1] %}
-<span class="next"><a href="/entry/{{sluginfo[1]}}">After -></a></span>
+<span class="next"><a href="/entry/{{sluginfo[1]}}">{{sluginfo[1]}}</a> →</span>
 {% end %}
 </div>
 {% end %}
