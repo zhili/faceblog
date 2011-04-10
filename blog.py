@@ -155,8 +155,7 @@ class ComposeHandler(BaseHandler):
     def get(self):
         key = self.get_argument("key", None)
         entry = Entry.get(key) if key else None
-        pageInfo = (None, None)
-        self.render("compose.html", entry=entry, archives=self.get_archives()[:4], pageinfo=pageInfo)
+        self.render("compose.html", entry=entry, archives=self.get_archives()[:4])
 
     @administrator
     def post(self):
