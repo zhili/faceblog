@@ -201,7 +201,7 @@ class EntryModule(tornado.web.UIModule):
 
 class SearchHandle(BaseHandler):
     def get(self,):
-        keyword = self.get_argument("s")
+        keyword = self.get_argument("s").strip()
         entries = Entry.search(keyword)
         self.render("search_result.html", entries=entries, archives=self.get_archives()[:4], SearchKeyWord=keyword)
 
