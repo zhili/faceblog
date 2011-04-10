@@ -523,7 +523,7 @@ class Searchable(object):
                     delete_keys.append(key)
             db.delete(delete_keys)
 
-    def enqueue_indexing(self, url, xsrf_token):
+    def enqueue_indexing(self, url, only_index=None):
         """Adds an indexing task to the default task queue.
         
         Args:
@@ -532,10 +532,10 @@ class Searchable(object):
         """
         if url:
             tRequest = tornado.web.RequestHandler
-            params = {'key': str(self.key()), '_xsrf':tRequest.xsrf_token}
-            logging.info("key_list: %s", xsrf_token)
-            # if only_index:
-            #     params['only_index'] = ' '.join(only_index)
+            params = {'key': str(self.key())}
+            # logging.info("key_list: %s", xsrf_token)
+            if only_index:
+                params['only_index'] = ' '.join(only_index)
             taskqueue.add(url=url, params=params)
 
 

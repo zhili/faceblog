@@ -188,10 +188,8 @@ class ComposeHandler(BaseHandler):
                 html=markdown.markdown(self.get_argument("markdown")),
             )
         entry.put()
-        entry.index()
-        # use inmediately index temparay, because xsrf problem
-        # if use task queue there some 403 error
-        # entry.enqueue_indexing(url="/tasks/searchindexbing", xsrf_token=self.xsrf_token)
+        # entry.index()
+        entry.enqueue_indexing(url="/tasks/searchindexing")
         self.redirect("/entry/" + entry.slug)
 
 
@@ -205,7 +203,7 @@ class SearchHandle(BaseHandler):
         entries = Entry.search(keyword)
         self.render("search_result.html", entries=entries, archives=self.get_archives()[:4], SearchKeyWord=keyword)
 
-class SearchIndexing(BaseHandler):
+class SearchIndexingHandle(BaseHandler):
     """Handler for full text indexing task."""
     def post(self):
         key_str = self.get_argument('key')
@@ -233,7 +231,7 @@ application = tornado.wsgi.WSGIApplication([
     (r"/(\d{4})/(\d{2})", MonthArchiveHandle),
     (r"/page/(\d+)/", PagingHandle),
     (r"/search", SearchHandle),
-    (r"/tasks/searchindexing", SearchIndexing),
+    (r"/tasks/searchindexing", SearchIndexingHandle),
 ], **settings)
 
 
