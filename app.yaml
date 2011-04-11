@@ -1,4 +1,4 @@
-application: tornado-appengine
+application: omniweblog
 version: 1
 runtime: python
 api_version: 1
