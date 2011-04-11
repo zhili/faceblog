@@ -104,8 +104,8 @@ class EntryHandler(BaseHandler):
         archives = self.get_archives()
         nextEntry = db.Query(Entry).filter('published >', entry.published).order('published').get()
         prevEntry = db.Query(Entry).filter('published <', entry.published).order('-published').get()
-        slugInfo = (prevEntry.slug if prevEntry else None, nextEntry.slug if nextEntry else None)
-        self.render("entry.html", entry=entry, archives=archives[:4], sluginfo=slugInfo)
+        prevNextEntry = (prevEntry, nextEntry)
+        self.render("entry.html", entry=entry, archives=archives[:4], prevnextentry=prevNextEntry)
 
 class PagingHandler(BaseHandler):
     def get(self, page):
