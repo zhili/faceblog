@@ -12,7 +12,7 @@
       <div class="header">
         <div style="float:right">
           {% if not current_user %}
-            {{ _('<a href="%(url)s">Sign in</a> to compose/edit') % {"url": escape(users.create_login_url(request.uri))} }}
+            {{ _('<a href="%(url)s">Sign in</a>') % {"url": escape(users.create_login_url(request.uri))} }}
           {% else %}
             {% if current_user.administrator %}
               <a href="/compose">{{ _("New post") }}</a> -
