@@ -22,7 +22,7 @@
         </div>
         <h1>
           {{ escape(handler.settings["blog_title"]) }}
-          <span>notes by me</span>
+          <span>{{ escape(handler.settings["blog_subtitle"]) }}</span>
         </h1>
       </div>
       <div id="content">{% block body %}{% end %}</div>
@@ -46,8 +46,7 @@
 
         <div class="first">
           <p><strong>About</strong></p>
-          <p><!-- The text in the "About Yourself" box on your profile page will automatically appear here. -->
-            i am a soldier!
+          <p>{{ escape(handler.settings["blog_about"]) }}
           </p>
         </div>
 

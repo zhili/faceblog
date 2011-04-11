@@ -35,6 +35,12 @@ p, ul, ol, pre {
     margin-bottom: 18px; 
 }
 
+@font-face {
+font-family:"Graublau Web";src:local("Graublau Web"),local("Graublau Web Regular"),local("GraublauWeb"),local("GraublauWeb-Regular"),url("/static/graublau-web.otf") format("opentype")}
+
+@font-face{font-family:"Graublau Web";font-weight:700;src:local("Graublau Web Bold"),local("GraublauWeb-Bold"),url("/static/graublau-web-bold.otf") format("opentype")}
+
+
 h1, h2, h3, h4 {
    font-family: "Graublau Web", "Lucida Grande", Helvetica, 'Hiragino Sans GB', "Hiragino Sans GB W6", sans-serif;
 }

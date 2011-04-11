@@ -215,7 +215,9 @@ class SearchIndexingHandler(BaseHandler):
             self.set_status(200)
 
 settings = {
-    "blog_title": u"Tornado App",
+    "blog_title": u"zhili/blog",
+    "blog_subtitle": u"Random ideas & notes by zhilihu",
+    "blog_about": u"I am a wireless engineer.",
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
     "ui_modules": {"Entry": EntryModule},
     "xsrf_cookies": True,
