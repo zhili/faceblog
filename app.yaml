@@ -4,13 +4,20 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /static/
-  static_dir: static
 
-- url: /fonts/(.*\.otf)
-  static_files: static/fonts/\1
+- url: /fonts/graublau-web.otf
+  static_files: static/fonts/graublau-web.otf
+  upload: static/fonts/graublau-web.otf
   mime_type: font/opentype
-  upload: /fonts/(.*\.otf)
+
+- url: /fonts/graublau-web-bold.otf
+  static_files: static/fonts/graublau-web-bold.otf
+  upload: static/fonts/graublau-web-bold.otf
+  mime_type: font/opentype
+
+- url: /static/(.*\.css)
+  static_files: static/\1
+  upload: /static/(.*\.css)
 
 - url: /tasks/searchindexing
   script: blog.py
