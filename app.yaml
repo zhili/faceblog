@@ -7,6 +7,11 @@ handlers:
 - url: /static/
   static_dir: static
 
+- url: /fonts/(.*\.otf)
+  static_files: static/fonts/\1
+  mime_type: font/opentype
+  upload: /fonts/(.*\.otf)
+
 - url: /tasks/searchindexing
   script: blog.py
   login: admin
