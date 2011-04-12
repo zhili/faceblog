@@ -25,7 +25,7 @@ body {
     text-align: center;
     font-size: 18px;
     line-height: 26px;
-    font-family: "ff-tisa-web-pro-1","ff-tisa-web-pro-2","Lucida Grande", "Hiragino Sans GB", "Hiragino Sans GB W3", sans-serif;
+    font-family: "Lucida Grande", "Hiragino Sans GB", "Hiragino Sans GB W3", sans-serif;
 }
 
 a { color:#000; text-decoration: none; -webkit-transition: color 0.2s linear; }

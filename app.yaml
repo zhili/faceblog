@@ -17,7 +17,7 @@ handlers:
 
 - url: /static/(.*\.css)
   static_files: static/\1
-  upload: /static/(.*\.css)
+  upload: static/(.*\.css)
 
 - url: /tasks/searchindexing
   script: blog.py
