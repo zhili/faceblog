@@ -195,7 +195,7 @@ class ComposeHandler(BaseHandler):
             entry = Entry.get(key)
             entry.title = self.get_argument("title")
             entry.markdown = self.get_argument("markdown")
-            categories = [c.strip() for c in self.get_argument("categories").split(',') if len(c) != 0]
+            categories = [c.strip() for c in self.get_argument("categories").split(',') if len(c.strip()) != 0]
             entry.categories = [cat if type(cat) == db.Category else db.Category(unicode(cat)) for cat in categories]
             entry.html = markdown.markdown(self.get_argument("markdown"))
         else:
@@ -211,7 +211,7 @@ class ComposeHandler(BaseHandler):
                     break
                 slug += "-2"
 
-            categories = [c.strip() for c in self.get_argument("categories").split(',')]
+            categories = [c.strip() for c in self.get_argument("categories").split(',') if len(c.strip()) != 0]
             standarlized_categories = [cat if type(cat) == db.Category else db.Category(unicode(cat)) for cat in categories]
             entry = Entry(
                 author=self.current_user,
