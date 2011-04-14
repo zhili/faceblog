@@ -27,6 +27,10 @@ from google.appengine.api import users
 from google.appengine.ext import db
 from paging import *
 import search
+from google.appengine.api import memcache
+import logging
+
+ARCHIVES_CACHE_TIME = 600
 
 class Entry(search.Searchable, db.Model):
     """A single blog entry."""
@@ -75,17 +79,23 @@ class BaseHandler(tornado.web.RequestHandler):
         return tornado.web.RequestHandler.render_string(
             self, template_name, users=users, **kwargs)
 
-    def get_archives(self,):
-        entries = db.Query(Entry).order('-published')
-        archives = []
-        markDict = {}
-        for entry in entries:
-            year = entry.published.year
-            month = entry.published.month
-            if (year, month) in markDict:
-                continue
-            markDict[(year, month)] = 1
-            archives.append((year, "%02d" % month, datetime.date(year, month, 1).strftime("%B %Y")))
+    def get_archives(self, fullArchives=False):
+        
+        archives = memcache.get("recently_archives")
+        if not archives:
+             entries = db.Query(Entry).order('-published')
+             markDict = {}
+             archives = []
+             for entry in entries:
+                   year = entry.published.year
+                   month = entry.published.month
+                   if (year, month) in markDict:
+                         continue
+                   markDict[(year, month)] = 1
+                   archives.append((year, "%02d" % month, datetime.date(year, month, 1).strftime("%B %Y")))
+             memcache.set("recently_archives", archives, ARCHIVES_CACHE_TIME)
+        if not fullArchives and archives:
+             return archives[:4]
         return archives
 
 PAGESIZE = 5
@@ -101,11 +111,10 @@ class EntryHandler(BaseHandler):
     def get(self, slug):
         entry = db.Query(Entry).filter("slug =", slug).get()
         if not entry: raise tornado.web.HTTPError(404)
-        archives = self.get_archives()
         nextEntry = db.Query(Entry).filter('published >', entry.published).order('published').get()
         prevEntry = db.Query(Entry).filter('published <', entry.published).order('-published').get()
         prevNextEntry = (prevEntry, nextEntry)
-        self.render("entry.html", entry=entry, archives=archives[:4], prevnextentry=prevNextEntry)
+        self.render("entry.html", entry=entry, archives=self.get_archives(), prevnextentry=prevNextEntry)
 
 class PagingHandler(BaseHandler):
     def get(self, page):
@@ -123,13 +132,12 @@ class PagingHandler(BaseHandler):
             pageInfo[0] = pageNumber+1
         if thisPagedQuery.has_page(pageNumber-1):
             pageInfo[1] = pageNumber-1
-        archives = self.get_archives()
-        self.render("home.html", entries=entries, archives=archives[:4], pageinfo=pageInfo)
+        self.render("home.html", entries=entries, archives=self.get_archives(), pageinfo=pageInfo)
 
 
 class ArchiveHandler(BaseHandler):
     def get(self):
-        self.render("archive.html", entries=self.get_archives(), archives=self.get_archives()[:4])
+        self.render("archive.html", entries=self.get_archives(fullArchives=True), archives=self.get_archives())
 
 class MonthArchiveHandler(BaseHandler):
     def get(self, year, month):
@@ -144,7 +152,7 @@ class MonthArchiveHandler(BaseHandler):
             endMonth += 1
         endDate = datetime.date(int(endYear), int(endMonth), 1)
         entries = Entry.all().filter('published >=', startDate).filter('published <', endDate).order('-published')
-        self.render("archives.html", entries=entries, archives=self.get_archives()[:4])
+        self.render("archives.html", entries=entries, archives=self.get_archives())
 
 class FeedHandler(BaseHandler):
     def get(self):
@@ -158,7 +166,7 @@ class ComposeHandler(BaseHandler):
     def get(self):
         key = self.get_argument("key", None)
         entry = Entry.get(key) if key else None
-        self.render("compose.html", entry=entry, archives=self.get_archives()[:4])
+        self.render("compose.html", entry=entry, archives=self.get_archives())
 
     @administrator
     def post(self):
@@ -201,7 +209,7 @@ class SearchHandler(BaseHandler):
     def get(self,):
         keyword = self.get_argument("s").strip()
         entries = Entry.search(keyword)
-        self.render("search_result.html", entries=entries, archives=self.get_archives()[:4], SearchKeyWord=keyword)
+        self.render("search_result.html", entries=entries, archives=self.get_archives(), SearchKeyWord=keyword)
 
 class SearchIndexingHandler(BaseHandler):
     """Handler for full text indexing task."""

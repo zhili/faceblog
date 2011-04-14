@@ -54,10 +54,12 @@
         <div>
           <p><strong>Recently</strong></p>
           <ul class="nav">
+            {% if archives %}
             {% for item in archives %}
             <li>
               <a href="/{{ item[0] }}/{{ item[1]}}">{{ item[2] }}</a>
             </li>
+            {% end %}
             {% end %}
             <li>
               <a href="/archive"><strong>View All Entries</strong></a>
@@ -82,8 +84,8 @@
       <div class="copyright">
         {% if request.uri != "/page/1/" %}
         <span class="previous">← <a href="/">Back to Home</a></span>
-        <p>© zhilihu / blog. Powered by <a href="http://www.tornadoweb.org/">Tornado</a> theming from <a href="http://powazek.com/depo-skinny">DePo Skinny</a>.</p>
         {% end %}
+        <p>© zhilihu / blog. Powered by <a href="http://www.tornadoweb.org/">Tornado</a> theming from <a href="http://powazek.com/depo-skinny">DePo Skinny</a>.</p>
       </div>
       {% end %}
 
