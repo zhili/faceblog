@@ -55,11 +55,11 @@
           <p><strong>Recently</strong></p>
           <ul class="nav">
             {% if archives %}
-            {% for item in archives %}
-            <li>
-              <a href="/{{ item[0] }}/{{ item[1]}}">{{ item[2] }}</a>
-            </li>
-            {% end %}
+              {% for item in archives %}
+              <li>
+                <a href="/{{ item[0] }}/{{ item[1]}}">{{ item[2] }}</a>
+              </li>
+              {% end %}
             {% end %}
             <li>
               <a href="/archive"><strong>View All Entries</strong></a>

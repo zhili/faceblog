@@ -160,6 +160,7 @@ pre {
     width: 180px;
 }
 
+.entry p a, .entry li a { font-weight:bold }
 
 .entry {
     border-bottom: 1px solid #ccc;
@@ -168,12 +169,12 @@ pre {
     width:500px;
 }
 
-.entry .date {
+.entry .byline {
     margin-top:-10px;
-    font-size:11px;
+    font-size: 90%;
     color: #555;
-
 }
+
 
 .entry p {
   margin: 0;

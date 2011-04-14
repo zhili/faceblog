@@ -28,6 +28,7 @@ from google.appengine.ext import db
 from paging import *
 import search
 from google.appengine.api import memcache
+from google.appengine.datastore import entity_pb
 import logging
 
 ARCHIVES_CACHE_TIME = 600
@@ -39,6 +40,7 @@ class Entry(search.Searchable, db.Model):
     slug = db.StringProperty(required=True)
     markdown = db.TextProperty(required=True)
     html = db.TextProperty(required=True)
+    categories = db.ListProperty(db.Category)
     published = db.DateTimeProperty(auto_now_add=True)
     updated = db.DateTimeProperty(auto_now=True)
     INDEX_TITLE_FROM_PROP = 'slug'
@@ -97,6 +99,24 @@ class BaseHandler(tornado.web.RequestHandler):
         if not fullArchives and archives:
              return archives[:4]
         return archives
+    
+    def serialize_entities(self, models):
+        # serialize using protocol buffer.
+        if not models:
+            return None
+        elif isinstance(models, db.Model):
+            return db.model_to_protobuf(models).Encode()
+        else:
+            return [db.model_to_protobuf(x).Encode() for x in models]
+
+    def deserialize_entities(self, data):
+        # deserialize from protocol buffer
+        if not data:
+            return None
+        elif isinstance(data, str):
+            return db.model_from_protobuf(entity_pb.EntityProto(data))
+        else:
+            return [db.model_from_protobuf(entity_pb.EntityProto(x)) for x in data]
 
 PAGESIZE = 5
 
@@ -175,6 +195,8 @@ class ComposeHandler(BaseHandler):
             entry = Entry.get(key)
             entry.title = self.get_argument("title")
             entry.markdown = self.get_argument("markdown")
+            categories = [c.strip() for c in self.get_argument("categories").split(',')]
+            entry.categories = [cat if type(cat) == db.Category else db.Category(unicode(t)) for cat in categories]
             entry.html = markdown.markdown(self.get_argument("markdown"))
         else:
             title = self.get_argument("title")
@@ -188,12 +210,16 @@ class ComposeHandler(BaseHandler):
                 if not existing or str(existing.key()) == key:
                     break
                 slug += "-2"
+
+            categories = [c.strip() for c in self.get_argument("categories").split(',')]
+            standarlized_categories = [cat if type(cat) == db.Category else db.Category(unicode(cat)) for cat in categories]
             entry = Entry(
                 author=self.current_user,
                 title=title,
                 slug=slug,
                 markdown=self.get_argument("markdown"),
                 html=markdown.markdown(self.get_argument("markdown")),
+                categories=standarlized_categories
             )
         entry.put()
         # entry.index()
@@ -222,6 +248,12 @@ class SearchIndexingHandler(BaseHandler):
                 entity.index()
             self.set_status(200)
 
+class CategoriesHandler(BaseHandler):
+    def get(self, category):
+        # logging.info(category)
+        entries = Entry.all().filter("categories =", category.decode("utf-8"))
+        self.render("categories.html", entries=entries, archives=self.get_archives())
+        
 settings = {
     "blog_title": u"zhili/blog",
     "blog_subtitle": u"Random ideas & notes by zhilihu",
@@ -242,6 +274,7 @@ application = tornado.wsgi.WSGIApplication([
     (r"/page/(\d+)/", PagingHandler),
     (r"/search", SearchHandler),
     (r"/tasks/searchindexing", SearchIndexingHandler),
+    (r"/categories/([^/]+)/", CategoriesHandler)
 ], **settings)
 
 

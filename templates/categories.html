@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block body %}
+  {% for entry in entries %}
+    {{ modules.Entry(entry) }}
+  {% end %}
+{% end %}
+
+{% block paging %}
+<!-- override paging info -->
+<!-- archive view don't need that! -->
+{% end %}
