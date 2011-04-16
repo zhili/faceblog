@@ -286,6 +286,7 @@ class CommentHandler(BaseHandler):
             slug = slug,
             )
         comment.put()
+        self.redirect("/entry/" + comment.slug)
         
 settings = {
     "blog_title": u"zhili/blog",
