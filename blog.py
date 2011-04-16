@@ -46,7 +46,15 @@ class Entry(search.Searchable, db.Model):
     INDEX_TITLE_FROM_PROP = 'slug'
     INDEX_ONLY = ['title', 'markdown']
 
-
+class Comment(db.Model):
+    # the comment associated with an entry.
+    author = db.TextProperty(True)
+    email = db.EmailProperty(True)
+    url = db.LinkProperty(True)
+    body = db.TextProperty(True)
+    published = db.DateTimeProperty(auto_now_add=True)
+    slug = db.StringProperty(required=True)
+    
 def administrator(method):
     """Decorate with this method to restrict to site admins."""
     @functools.wraps(method)
@@ -85,19 +93,19 @@ class BaseHandler(tornado.web.RequestHandler):
         
         archives = memcache.get("recently_archives")
         if not archives:
-             entries = db.Query(Entry).order('-published')
-             markDict = {}
-             archives = []
-             for entry in entries:
-                   year = entry.published.year
-                   month = entry.published.month
-                   if (year, month) in markDict:
-                         continue
-                   markDict[(year, month)] = 1
-                   archives.append((year, "%02d" % month, datetime.date(year, month, 1).strftime("%B %Y")))
-             memcache.set("recently_archives", archives, ARCHIVES_CACHE_TIME)
+            entries = db.Query(Entry).order('-published')
+            markDict = {}
+            archives = []
+            for entry in entries:
+                year = entry.published.year
+                month = entry.published.month
+                if (year, month) in markDict:
+                    continue
+                markDict[(year, month)] = 1
+                archives.append((year, "%02d" % month, datetime.date(year, month, 1).strftime("%B %Y")))
+                memcache.set("recently_archives", archives, ARCHIVES_CACHE_TIME)
         if not fullArchives and archives:
-             return archives[:4]
+            return archives[:4]
         return archives
     
     def serialize_entities(self, models):
@@ -134,7 +142,8 @@ class EntryHandler(BaseHandler):
         nextEntry = db.Query(Entry).filter('published >', entry.published).order('published').get()
         prevEntry = db.Query(Entry).filter('published <', entry.published).order('-published').get()
         prevNextEntry = (prevEntry, nextEntry)
-        self.render("entry.html", entry=entry, archives=self.get_archives(), prevnextentry=prevNextEntry)
+        comments = db.Query(Comment).filter("slug =", slug).fetch(100)
+        self.render("entry.html", entry=entry, comments=comments, archives=self.get_archives(), prevnextentry=prevNextEntry)
 
 class PagingHandler(BaseHandler):
     def get(self, page):
@@ -220,7 +229,7 @@ class ComposeHandler(BaseHandler):
                 markdown=self.get_argument("markdown"),
                 html=markdown.markdown(self.get_argument("markdown")),
                 categories=standarlized_categories
-            )
+                )
         entry.put()
         # entry.index()
         entry.enqueue_indexing(url="/tasks/searchindexing")
@@ -231,6 +240,10 @@ class EntryModule(tornado.web.UIModule):
     def render(self, entry):
         return self.render_string("modules/entry.html", entry=entry)
 
+class CommentModule(tornado.web.UIModule):
+    def render(self, comment):
+        return self.render_string("modules/comment.html", comment=comment)
+    
 class SearchHandler(BaseHandler):
     def get(self,):
         keyword = self.get_argument("s").strip()
@@ -253,13 +266,33 @@ class CategoriesHandler(BaseHandler):
         # logging.info(category)
         entries = Entry.all().filter("categories =", category.decode("utf-8"))
         self.render("categories.html", entries=entries, archives=self.get_archives())
+
+class CommentHandler(BaseHandler):
+    """handle comment posting.
+    """
+    def post(self):
+        """ http post method.
+        """
+        author = self.get_argument("author")
+        email = self.get_argument("email")
+        url = self.get_argument("url")
+        body = self.get_argument("body")
+        slug = self.get_argument("slug")
+        comment = Comment(
+            author = author,
+            email = email,
+            url = url,
+            body = body,
+            slug = slug,
+            )
+        comment.put()
         
 settings = {
     "blog_title": u"zhili/blog",
     "blog_subtitle": u"Random ideas & notes by zhilihu",
     "blog_about": u"I am a wireless engineer.",
     "template_path": os.path.join(os.path.dirname(__file__), "templates"),
-    "ui_modules": {"Entry": EntryModule},
+    "ui_modules": {"Entry": EntryModule, "Comment": CommentModule},
     "xsrf_cookies": True,
 }
 
@@ -274,7 +307,8 @@ application = tornado.wsgi.WSGIApplication([
     (r"/page/(\d+)/", PagingHandler),
     (r"/search", SearchHandler),
     (r"/tasks/searchindexing", SearchIndexingHandler),
-    (r"/categories/([^/]+)/", CategoriesHandler)
+    (r"/categories/([^/]+)/", CategoriesHandler),
+    (r"/postcomment", CommentHandler)
 ], **settings)
 
 

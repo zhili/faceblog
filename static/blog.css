@@ -181,6 +181,24 @@ pre {
   margin-bottom: 1em;
 }
 
+.entrycomment {
+    margin:18px 0 0 0;
+    padding: 5px 0 5px 18px;
+    text-align:left;
+    width: 620px;
+    color:#666;
+    border-left: 5px solid #ccc;
+}
+
+.text_area { width: 620px !important; }
+
+p.cmtbyline {
+    margin-top:-10px;
+    margin-bottom: 0;
+    font-size: 90%;
+    color: #555;
+}
+
 .postnoline {
     padding:18px 0 0 0;
     text-align:left;

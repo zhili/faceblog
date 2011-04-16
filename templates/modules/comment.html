@@ -1,0 +1,4 @@
+<div class="entrycomment">
+  <p> {{ comment.body }}</p>
+  <p class="cmtbyline">Posted by <a href="{{comment.url}}" rel="external nofollow" class="url">{{comment.author}}</a> on {{locale.format_date(comment.published, full_format=True, shorter=False) }}</p>
+</div>

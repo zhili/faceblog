@@ -2,7 +2,52 @@
 
 {% block body %}
   {{ modules.Entry(entry) }}
+
+  {% block comments_list %}
+    {% if comments %}
+      <div id="comments" class="entry">
+	<h3 class="comments_headers">
+          {% if len(comments) > 1 %} 
+          {{len(comments)}} Comments
+          {% else %}
+          1 Comment
+          {% end %}
+        </h3>
+      </div>
+      {% for comment in comments %}
+        {{ modules.Comment(comment) }}
+      {% end %}
+    {% else %}
+      <div id="comments" class="entry">
+        <h3 class="comments_headers">No Comments Yet</h3>
+      </div>
+      <div class="content">
+	<p>There are no comments yet. You could be the first!</p>
+      </div>
+    {% end %}
+  {% end %}
+
+{% block post_comment %}
+<div class="entry">
+  <div class="content">
+    <h3 id="respond" class="comments_headers">Leave a Comment</h3>
+    <form action="/postcomment" method="post" id="comment_form">
+      <p><input class="text_input" type="text" name="author" id="author" value="" tabindex="1"><label for="author"><strong> Name</strong></label></p>
+      <p><input class="text_input" type="text" name="email" id="email" value="" tabindex="2"><label for="email"><strong> Email</strong></label></p>
+      <p><input class="text_input" type="text" name="url" id="url" value="" tabindex="3"><label for="url"><strong> Website</strong></label></p>
+      <p><textarea class="text_input text_area" name="body" id="body" cols="7" rows="7" tabindex="4"></textarea></p>
+      <p>
+	<input name="submit" class="form_submit" type="submit" id="submit"  tabindex="5" value="Submit">
+	<input type="hidden" name="slug" value="{{entry.slug}}">
+      </p>
+      {{ xsrf_form_html() }}
+    </form>
+  </div>
+</div>
 {% end %}
+
+{% end %}
+
 
 {% block paging %}
 <div class="postnoline">
@@ -14,3 +59,4 @@
 {% end %}
 </div>
 {% end %}
+
