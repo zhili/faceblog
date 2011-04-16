@@ -31,7 +31,8 @@ from google.appengine.api import memcache
 from google.appengine.datastore import entity_pb
 import logging
 
-ARCHIVES_CACHE_TIME = 600
+ARCHIVES_CACHE_TIME = 43200
+CATEGORIES_REFRESH_TIME = 3600
 
 class Entry(search.Searchable, db.Model):
     """A single blog entry."""
@@ -142,7 +143,7 @@ class EntryHandler(BaseHandler):
         nextEntry = db.Query(Entry).filter('published >', entry.published).order('published').get()
         prevEntry = db.Query(Entry).filter('published <', entry.published).order('-published').get()
         prevNextEntry = (prevEntry, nextEntry)
-        comments = db.Query(Comment).filter("slug =", slug).fetch(100)
+        comments = db.Query(Comment).filter("slug =", slug).fetch(1000)
         self.render("entry.html", entry=entry, comments=comments, archives=self.get_archives(), prevnextentry=prevNextEntry)
 
 class PagingHandler(BaseHandler):
@@ -166,7 +167,15 @@ class PagingHandler(BaseHandler):
 
 class ArchiveHandler(BaseHandler):
     def get(self):
-        self.render("archive.html", entries=self.get_archives(fullArchives=True), archives=self.get_archives())
+        allCategories = memcache.get("categories")
+        if not allCategories:
+            entries = Entry.all()
+            allCategories = set()
+            for entry in entries:
+                # logging.info(entry.categories)
+                allCategories = allCategories.union(set(entry.categories))
+            memcache.set("categories", allCategories, CATEGORIES_REFRESH_TIME)
+        self.render("archive.html", categories = allCategories, archive_list=self.get_archives(fullArchives=True), archives=self.get_archives())
 
 class MonthArchiveHandler(BaseHandler):
     def get(self, year, month):
