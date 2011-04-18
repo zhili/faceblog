@@ -273,7 +273,7 @@ class SearchIndexingHandler(BaseHandler):
 class CategoriesHandler(BaseHandler):
     def get(self, category):
         # logging.info(category)
-        entries = Entry.all().filter("categories =", category.decode("utf-8"))
+        entries = Entry.all().order("-published").filter("categories =", category.decode("utf-8"))
         self.render("categories.html", entries=entries, archives=self.get_archives())
 
 class CommentHandler(BaseHandler):

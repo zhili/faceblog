@@ -28,6 +28,6 @@ indexes:
 
 - kind: Entry
   properties:
-  - name: categoris
+  - name: categories
   - name: published
     direction: desc
