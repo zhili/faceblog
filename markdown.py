@@ -128,7 +128,7 @@ def _hash_text(s):
 
 # Table of hash values for escaped characters:
 g_escape_table = dict([(ch, _hash_ascii(ch))
-                       for ch in '\\`*_{}[]()>#+-.!'])
+                       for ch in '\\`*_{}[]()>#+-.!&<'])
 
 
 
@@ -267,6 +267,9 @@ class Markdown(object):
                         ename, earg = e, None
                     self.extras[ename] = earg
 
+        # escape all tex fomular.
+        text = self._escape_tex(text)
+
         # Standardize line endings:
         text = re.sub("\r\n|\r", "\n", text)
 
@@ -322,6 +325,36 @@ class Markdown(object):
         """
         return text
 
+    def _escape_tex(self, text):
+        """escape any latex text"""
+        inline_re = re.compile(r'\\\(.*\\\)')
+        _text = inline_re.sub(self._tex_sub, text)
+        non_inline_re = re.compile(r'\\\[.*\\\]')
+        _text = non_inline_re.sub(self._tex_sub, _text)
+        return _text
+
+    def _tex_sub(self, text):
+        _text = text.group(0)
+        logging.info(_text)
+        replacements = [
+        # modified the escape table and am doing this right now to avoid these getting replaced
+        # by ampersand equivalents since they're potentially needed for latex
+        ('&', g_escape_table['&']),
+        ('>', g_escape_table['>']),
+        ('<', g_escape_table['<']),
+        # Now, escape characters that are magic in Markdown:
+        ('_', g_escape_table['_']),
+        ('{', g_escape_table['{']),
+        ('}', g_escape_table['}']),
+        ('(', g_escape_table['(']),
+        (')', g_escape_table[')']),
+        ('[', g_escape_table['[']),
+        (']', g_escape_table[']']),
+        ('\\', g_escape_table['\\']),
+        ]
+        for before, after in replacements:
+            _text = _text.replace(before, after)
+        return _text
     _emacs_oneliner_vars_pat = re.compile(r"-\*-\s*([^\r\n]*?)\s*-\*-", re.UNICODE)
     # This regular expression is intended to match blocks like this:
     #    PREFIX Local Variables: SUFFIX
